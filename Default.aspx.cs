@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace RAPIDSOURCE
 {
@@ -18,12 +19,37 @@ namespace RAPIDSOURCE
                                                Request.UserAgent.Contains("LinkedInBot") ||
                                                Request.UserAgent.Contains("Pinterest")))
             {
+                // Log the redirection
+                LogRedirection(Request.UserAgent);
+
                 // Redirect bots to another site
                 Response.Redirect("https://playground.rapidsource.eu/test/", true);
             }
             else
             {
-                // Continue serving the regular landing page :)
+                // Continue serving the regular landing page
+            }
+        }
+
+        private void LogRedirection(string userAgent)
+        {
+            try
+            {
+                string logFilePath = Server.MapPath("~/Logs/redirection.log");
+                string logMessage = $"Redirection for bot with user-agent: {userAgent} at {DateTime.Now}";
+
+                // Append the log message to the log file
+                File.AppendAllText(logFilePath, logMessage + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during logging (e.g., write to event log)
+                // For simplicity, i´m logging the exception message for testing #TEST_EXCEPTIONS
+                string logFilePath = Server.MapPath("~/Logs/error.log");
+                string logMessage = $"Error occurred while logging redirection: {ex.Message} at {DateTime.Now}";
+
+                // Append the log message to the error log file
+                File.AppendAllText(logFilePath, logMessage + Environment.NewLine);
             }
         }
     }
