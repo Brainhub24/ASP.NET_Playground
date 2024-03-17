@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YourNamespace
+namespace RAPIDSOURCE
 {
     public partial class Default : System.Web.UI.Page
     {
