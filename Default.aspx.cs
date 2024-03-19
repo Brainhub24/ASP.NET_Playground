@@ -19,18 +19,48 @@ namespace RAPIDSOURCE
             // Load bot details from the JSON file
             List<BotDetails> bots = LoadBotDetailsFromJson("MOSTWANTED.json");
 
-            // Check if the user-agent indicates a bot
-            if (Request.UserAgent != null && IsBot(Request.UserAgent, bots))
-            {
-                // Log the redirection
-                LogRedirection(Request.UserAgent);
+            // Set server signature
+            Response.Headers.Add("Server", "DragonX by Webservice Digital (https://dragon.webservice.digital)");
 
-                // Redirect bots to another site
-                Response.Redirect("https://playground.rapidsource.eu/test/?testview.py", true);
-            }
-            else
+
+            try
             {
-                // Continue serving the regular landing page
+                // Check if the user-agent indicates a bot
+                if (Request.UserAgent != null && IsBot(Request.UserAgent, bots))
+                {
+                    // Log the redirection
+                    LogRedirection(Request.UserAgent);
+
+                    // Redirect bots to another site
+                    Response.Redirect("https://playground.rapidsource.eu/test/?testview.py", true);
+                }
+                else
+                {
+                    // Continue serving the regular landing page
+                    // 404 and 403 issue simulation for testing
+                    /* + + + + + + + + + + + + + + + + + + + + + + + + + + + */
+                    // Simulate the errors 4 test:
+                    //if (Request.Url.AbsoluteUri.Contains("404test"))
+                    //{
+                    //    Response.StatusCode = 404; // Not Found
+                    //    Response.End();
+                    //}
+                    //else if (Request.Url.AbsoluteUri.Contains("403test"))
+                    //{
+                    //    Response.StatusCode = 403; // Forbidden
+                    //    Response.End();
+                    //}
+                    /* + + + + + + + + + + + + + + + + + + + + + + + + + + + */
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during page load
+                // SO: https://stackoverflow.com/questions/3316762/what-is-deserialize-and-serialize-in-json
+                LogError($"Error occurred during page load: {ex.Message}");
+                // Handle the error gracefully or display an error page
+                Response.StatusCode = 500; // Internal Server Error
+                Response.End();
             }
         }
 
@@ -49,14 +79,7 @@ namespace RAPIDSOURCE
             catch (Exception ex)
             {
                 // Handle any exceptions that occur during JSON deserialization
-                // SO: https://stackoverflow.com/questions/3316762/what-is-deserialize-and-serialize-in-json
-                // For simplicity, i´m logging the exception message for testing #TEST_EXCEPTIONS
-                string logFilePath = Server.MapPath("~/Logs/error.log");
-                string logMessage = $"Error occurred while loading bot details from JSON file: {ex.Message} at {DateTime.Now}";
-
-                // Append the log message to the error log file
-                File.AppendAllText(logFilePath, logMessage + Environment.NewLine);
-
+                LogError($"Error occurred while loading bot details from JSON file: {ex.Message}");
                 return new List<BotDetails>();
             }
         }
@@ -89,13 +112,25 @@ namespace RAPIDSOURCE
             }
             catch (Exception ex)
             {
-                // Handle any exceptions that occur during logging (e.g., write to event log)
-                // For simplicity, you can log the exception message
+                // Handle any exceptions that occur during logging
+                LogError($"Error occurred while logging redirection: {ex.Message}");
+            }
+        }
+
+        private void LogError(string errorMessage)
+        {
+            try
+            {
                 string logFilePath = Server.MapPath("~/Logs/error.log");
-                string logMessage = $"Error occurred while logging redirection: {ex.Message} at {DateTime.Now}";
+                string logMessage = $"Error: {errorMessage} at {DateTime.Now}";
 
                 // Append the log message to the error log file
                 File.AppendAllText(logFilePath, logMessage + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception message if an error occurs while logging
+                Console.WriteLine($"Error occurred while logging error: {ex.Message}");
             }
         }
     }
