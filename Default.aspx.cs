@@ -40,6 +40,7 @@ namespace RAPIDSOURCE
                     // 404 and 403 issue simulation for testing
                     /* + + + + + + + + + + + + + + + + + + + + + + + + + + + */
                     // Simulate the errors 4 test:
+                    // https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
                     //if (Request.Url.AbsoluteUri.Contains("404test"))
                     //{
                     //    Response.StatusCode = 404; // Not Found
